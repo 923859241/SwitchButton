@@ -1,4 +1,4 @@
-package com.example.switchbutton
+package com.example.switchbutton.button
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -6,7 +6,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Switch
+import com.example.switchbutton.R
 
 
 /**
@@ -55,20 +55,15 @@ class SwitchButtonView@JvmOverloads constructor(context: Context,
 
     private lateinit var mListener: onSwitchListener
 
-    //初始化
     init{
-        val ta:TypedArray  = context.obtainStyledAttributes(attrs, R.styleable.SwitchButtonView);
+        val ta:TypedArray  = context.obtainStyledAttributes(attrs,
+            R.styleable.SwitchButtonView
+        );
         isChecked = ta.getBoolean(R.styleable.SwitchButtonView_checked, false);
         ta.recycle()
         viewInit(context)
     }
 
-
-    /**
-     * 视图、数据初始化
-     *
-     * @param context
-     */
     private fun viewInit(context:Context)
     {
         mPaint = Paint()
@@ -77,27 +72,33 @@ class SwitchButtonView@JvmOverloads constructor(context: Context,
 
         saveFlags = Canvas.ALL_SAVE_FLAG
 
-        bitmapBackGround = BitmapFactory.decodeResource(resources, R.mipmap.switch_bg)
-        bitmapBall = BitmapFactory.decodeResource(resources, R.mipmap.switch_ball)
-        bitmapBottom = BitmapFactory.decodeResource(resources, R.mipmap.switch_bottom)
-        bitmapBlack = BitmapFactory.decodeResource(resources, R.mipmap.switch_black)
+        bitmapBackGround = BitmapFactory.decodeResource(resources,
+            R.mipmap.switch_bg
+        )
+        bitmapBall = BitmapFactory.decodeResource(resources,
+            R.mipmap.switch_ball
+        )
+        bitmapBottom = BitmapFactory.decodeResource(resources,
+            R.mipmap.switch_bottom
+        )
+        bitmapBlack = BitmapFactory.decodeResource(resources,
+            R.mipmap.switch_black
+        )
         //获取图片大小
         switchWidth = bitmapBackGround.width
         switchHeight = bitmapBackGround.height
-        //是否为开
+        //是否打开
         if (isChecked) {
             ballMoveState = RIGHT_MOST
             ballX = bitmapBackGround.width - bitmapBall.width
         }
     }
 
-    //度量框的大小
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         setMeasuredDimension(switchWidth, switchHeight)
     }
 
-    //在touch事件中不断更新onDrow中改变的部分
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         //增加图层
@@ -122,7 +123,6 @@ class SwitchButtonView@JvmOverloads constructor(context: Context,
         }
         mPaint.xfermode = null
         canvas?.restore()
-        //判断小球状态与决定其在画板上的位置
         ballMoveState(canvas)
     }
 
@@ -134,7 +134,6 @@ class SwitchButtonView@JvmOverloads constructor(context: Context,
      */
     private fun ballMoveState(canvas:Canvas?)
     {
-        //判断当前小球的状态，从而在画板上决定小球的显示
         when(ballMoveState) {
             TOUCH_STATE_DOWN -> null
             TOUCH_STATE_MOVE -> {
@@ -148,7 +147,7 @@ class SwitchButtonView@JvmOverloads constructor(context: Context,
             }
 
             TOUCH_STATE_UP -> null
-            //最左边 True
+
             LEFT_MOST -> {
                 if (touchX > 0 && touchX < switchWidth / 2) {
                     canvas?.drawBitmap(bitmapBall, 0F, 0F, mPaint);
@@ -160,7 +159,6 @@ class SwitchButtonView@JvmOverloads constructor(context: Context,
                     canvas?.drawBitmap(bitmapBall, switchWidth - bitmapBall.width.toFloat(), 0F, mPaint)
                 }
             }
-            //最右边 False
             RIGHT_MOST -> canvas?.drawBitmap(bitmapBall, switchWidth - bitmapBall.width.toFloat(), 0F, mPaint)
 
             else -> null
@@ -168,7 +166,6 @@ class SwitchButtonView@JvmOverloads constructor(context: Context,
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        //监控触摸事件
         when(event?.action){
             MotionEvent.ACTION_DOWN -> touchStateChange(event.x.toInt(), TOUCH_STATE_DOWN)
             MotionEvent.ACTION_MOVE -> touchStateChange(event.x.toInt(), TOUCH_STATE_MOVE)
@@ -199,15 +196,14 @@ class SwitchButtonView@JvmOverloads constructor(context: Context,
         if (ballMoveState == TOUCH_STATE_UP) { //手指抬起
             ballX = 0;
             if (touchX >= switchWidth / 2f) {//最右
-                isChecked = false
+                isChecked = true
                 ballX = switchWidth - bitmapBall.width
                 ballMoveState = RIGHT_MOST
             } else {//最左
-                isChecked = true
+                isChecked = false
                 ballMoveState = LEFT_MOST
             }
-            //监听函数返回
-            mListener?.onSwitchChanged(isChecked)
+                mListener?.onSwitchChanged(isChecked)
         }
         /*
         请求重绘View树.即draw()过程.假如视图发生大小没有变化就不会调用layout()过程，并且只绘制那些“需要重绘的”
