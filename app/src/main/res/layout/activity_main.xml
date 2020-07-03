@@ -5,15 +5,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+    <LinearLayout
+        android:id="@+id/layoutContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
-    <com.example.switchbutton.button.SwitchButtonView2
+    <Button
+        android:id="@+id/buttonAdd"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#ffff00"
+        android:textAllCaps="false"
+        android:text="Add View"/>
+<!--    <com.example.switchbutton.button.SwitchButtonView2
         xmlns:widget="http://schemas.android.com/apk/res-auto"
         android:id="@+id/SwitchButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20sp"
         android:layout_marginTop="20sp"
-        widget:checked="false" />
+        widget:checked="false" />-->
+
+    </LinearLayout>
 
 
 </LinearLayout>

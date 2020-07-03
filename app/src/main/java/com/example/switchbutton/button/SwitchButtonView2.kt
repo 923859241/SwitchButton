@@ -8,11 +8,12 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatCheckBox
 
-class SwitchButtonView2@JvmOverloads constructor(context: Context,
-                              attrs: AttributeSet? = null,
-                              defStyleAttr: Int = 0) : AppCompatCheckBox(context,attrs,defStyleAttr) {
+open class SwitchButtonView2@JvmOverloads constructor(context: Context,
+                                                      attrs: AttributeSet? = null,
+                                                      defStyleAttr: Int = 0) : AppCompatCheckBox(context,attrs,defStyleAttr) {
         private val TAG = "SwitchButton"
         /**
          * 控件默认宽度
@@ -41,15 +42,15 @@ class SwitchButtonView2@JvmOverloads constructor(context: Context,
         /**
          * 状态切换时的动画时长
          */
-        private var mAnimateDuration = 300L
+        private var mAnimateDuration = 500L
         /**
          * 开关未选中状态,即关闭状态时的背景颜色
          */
-        private var mBackgroundColorUnchecked = 0xFFCCCCCC
+        private var mBackgroundColorUnchecked = Color.GRAY
         /**
          * 开关选中状态,即打开状态时的背景颜色
          */
-        private var mBackgroundColorChecked = 0xFF6495ED
+        private var mBackgroundColorChecked = Color.BLUE
         /**
          * 开关指示器按钮的颜色
          */
@@ -65,7 +66,9 @@ class SwitchButtonView2@JvmOverloads constructor(context: Context,
             // 默认 CheckBox 为关闭状态
             mPaint.isAntiAlias = true
             //在控件被点击时重新绘制 UI
-            setOnClickListener { startAnimate() }
+            setOnClickListener { //startAnimate()
+                startAnimate()
+            }
         }
 
         override fun onMeasure(widthMeasureSpec:Int,heightMeasureSpec:Int) {
@@ -97,9 +100,11 @@ class SwitchButtonView2@JvmOverloads constructor(context: Context,
             // 根据是否选中的状态设置画笔颜色
             mPaint.color = if (isChecked) {
                 // 选中状态时,背景颜色由未选中状态的背景颜色逐渐过渡到选中状态的背景颜色
-                 getCurrentColor(mColorGradientFactor, mBackgroundColorUnchecked, mBackgroundColorChecked)
+                getCurrentColor(mColorGradientFactor, mBackgroundColorUnchecked, mBackgroundColorChecked)
+                //0xFF6495ED.toInt()
             } else {
                 // 未选中状态时,背景颜色由选中状态的背景颜色逐渐过渡到未选中状态的背景颜色
+                //0xFFCCCCCC.toInt()
                 getCurrentColor(mColorGradientFactor, mBackgroundColorChecked, mBackgroundColorUnchecked)
             }
             // 设置背景的矩形范围
@@ -109,6 +114,7 @@ class SwitchButtonView2@JvmOverloads constructor(context: Context,
                 , measuredHeight - mPaint.strokeWidth
             )
             // 绘制圆角矩形作为背景
+            //绘画逻辑 根据mRectF生成的矩形，
             canvas?.drawRoundRect(mRectF, measuredHeight.toFloat(),
                 measuredHeight.toFloat(), mPaint)
 
@@ -127,11 +133,22 @@ class SwitchButtonView2@JvmOverloads constructor(context: Context,
                 measuredWidth - radius - mPaint.strokeWidth - mPaint.strokeWidth - mButtonCenterXOffset
             } else {
                 // 未选中状态时开关按钮指示器圆心的 X 坐标从右边逐渐移到左边
-                radius + mPaint.strokeWidth + mPaint.strokeWidth + mButtonCenterXOffset;
+                radius + mPaint.strokeWidth + mPaint.strokeWidth + mButtonCenterXOffset
             }
             // Y 坐标就是控件高度的一半不变
             y = (measuredHeight / 2).toFloat()
             canvas?.drawCircle(x, y, radius, mPaint)
+        }
+
+        override fun onTouchEvent(event: MotionEvent?): Boolean {
+            when(event?.action){
+                MotionEvent.ACTION_DOWN -> super.onTouchEvent(event)
+                MotionEvent.ACTION_MOVE -> null
+                MotionEvent.ACTION_UP -> super.onTouchEvent(event)
+                else -> null
+            }
+
+            return true
         }
 
         /**
@@ -144,8 +161,8 @@ class SwitchButtonView2@JvmOverloads constructor(context: Context,
          */
         private fun getCurrentColor(
             fraction:Float,
-            startColor: Long,
-            endColor: Long
+            startColor: Int,
+            endColor: Int
         ):Int {
             val redStart = Color.red(startColor)
             val blueStart = Color.blue(startColor)
@@ -177,33 +194,32 @@ class SwitchButtonView2@JvmOverloads constructor(context: Context,
             // 计算开关指示器的半径
             val radius = (measuredHeight - mPaint.strokeWidth * 4) / 2
             // 计算开关指示器的 X 坐标的总偏移量
-            val centerXOffset = measuredWidth - mPaint.strokeWidth - mPaint.strokeWidth - radius
-            - (mPaint.strokeWidth + mPaint.strokeWidth + radius)
+            val centerXOffset = measuredWidth - 2*(mPaint.strokeWidth + mPaint.strokeWidth + radius)
 
             val animatorSet = AnimatorSet()
             // 偏移量逐渐变化到 0 ObjectAnimator动画实现
-            val objectAnimator = ObjectAnimator.ofFloat(this, "alpha", centerXOffset, 0F)
+            val objectAnimator = ObjectAnimator.ofFloat(this, "buttonCenterXOffset", centerXOffset, 0F)
             objectAnimator.duration = mAnimateDuration
             objectAnimator.addUpdateListener { invalidate() }
 
             // 背景颜色过渡系数逐渐变化到 1
-            val objectAnimator2 = ObjectAnimator.ofFloat(this, "alpha", 0F, 1F)
+            val objectAnimator2 = ObjectAnimator.ofFloat(this, "colorGradientFactor", 0F, 1F)
             objectAnimator2.duration = mAnimateDuration
 
             // 同时开始修改开关指示器 X 坐标偏移量的动画和修改背景颜色过渡系数的动画
-            animatorSet.play(objectAnimator).with(objectAnimator2);
+            animatorSet.play(objectAnimator).with(objectAnimator2)
             animatorSet.start()
-
+            mListener?.onSwitchChanged(isChecked)
         }
 
-/*        fun setButtonCenterXOffset(buttonCenterXOffset:Float) {
+        fun setButtonCenterXOffset(buttonCenterXOffset:Float) {
             mButtonCenterXOffset = buttonCenterXOffset
         }
 
-        fun setColorGradientFactor(colorGradientFactor:Long) {
+        fun setColorGradientFactor(colorGradientFactor:Float) {
             mColorGradientFactor = colorGradientFactor
         }
-
+/*
         fun setAnimateDuration(animateDuration:Long) {
             mAnimateDuration = animateDuration
         }
