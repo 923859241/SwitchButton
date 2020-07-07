@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onRotateAndMove(rotateTime: Float, speedX: Float, speedY: Float) {
-
                 //旋转动画
                 val animatorRotate: ObjectAnimator = if (rotateTime > 0) {
                     ofFloat(newButton, "rotation", 0F, 360F)
@@ -66,8 +65,6 @@ class MainActivity : AppCompatActivity() {
                 val animator = AnimatorSet()
                 animator.play(animatorRotate).with(animatorMove)
                 animator.start()
-/*                var switchPoint = Point(newButton.x, newButton.y, speedX, speedY)
-                ButtonUtil.buttonMove(newButton, switchPoint)*/
             }
         })
         //在中间增加控件
