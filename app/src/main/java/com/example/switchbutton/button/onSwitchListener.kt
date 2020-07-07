@@ -9,14 +9,14 @@ interface onSwitchListener {
     fun onSwitchChanged(isCheck: Boolean)
 
     /**
-     * 控制按键选择方向与速度
+     * 控制按键旋转方向与速度，默认参数顺时针为正
+     * 控制按键x与y轴移动的速度，使用系统默认的xy正方向
      *
-     *
-     * @param rotateTime
-     * 转动一圈用的时间
-     * 默认参数顺时针为正
+     * @param rotateTime 转动一圈用的时间
+     * @param speedX x轴移动速度
+     * @param speedY y轴移动速度
      */
-    fun onRotate(rotateTime:Float)
+    fun onRotateAndMove(rotateTime:Float,speedX:Float,speedY:Float)
 
 
 }

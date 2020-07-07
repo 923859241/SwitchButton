@@ -161,15 +161,18 @@ open class SwitchButtonView2@JvmOverloads constructor(context: Context,
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when(event?.action){
             MotionEvent.ACTION_DOWN -> {
-                starPointX = event?.x
-                starPointY = event?.y
-                starTime = event?.downTime
+                starPointX = event.x
+                starPointY = event.y
+                starTime = event.downTime
                 super.onTouchEvent(event)
             }
             MotionEvent.ACTION_UP -> {
                 val delXY = abs(starPointY-event.y)+abs(starPointX-event.x)
-                if(delXY>MOVE_DISTANCE){
+                //转动与移动
+                if(delXY>MOVE_DISTANCE && !isRotate && !isMove){
                     clcRotateV(starPointX,starPointY,event.x,event.y,event.eventTime-starTime)
+                    isRotate = true
+                    isMove = true
                 }else{
                     super.onTouchEvent(event)
                 }
@@ -237,7 +240,7 @@ open class SwitchButtonView2@JvmOverloads constructor(context: Context,
         // 同时开始修改开关指示器 X 坐标偏移量的动画和修改背景颜色过渡系数的动画
         animatorSet.play(objectAnimator).with(objectAnimator2)
         animatorSet.start()
-        mListener?.onSwitchChanged(isChecked)
+        mListener.onSwitchChanged(isChecked)
     }
 
     fun setButtonCenterXOffset(buttonCenterXOffset:Float) {
@@ -264,7 +267,9 @@ open class SwitchButtonView2@JvmOverloads constructor(context: Context,
         //x轴决定转动方向 x轴与y轴共同决定转动速度
         val rotateV = (startX-(this.x+DEFAULT_WIDTH/2)) * (endY-startY)/touchTime
         val rotateTime = ( Math.PI*(this.x+DEFAULT_WIDTH/2)*(this.x+DEFAULT_WIDTH/2) ).toFloat() / rotateV
-        mListener.onRotate(rotateTime)
+        val moveXV = (endX-startX)/touchTime
+        val moveYV = (endY-startY)/touchTime
+        mListener.onRotateAndMove(rotateTime,moveXV,moveYV)
     }
 
 

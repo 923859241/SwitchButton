@@ -1,5 +1,6 @@
 package com.example.switchbutton
 
+import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.widget.Toast
@@ -8,16 +9,19 @@ import com.example.switchbutton.button.onSwitchListener
 import kotlinx.android.synthetic.main.activity_main.*
 import android.animation.ObjectAnimator.ofFloat
 import android.animation.ValueAnimator
-import android.graphics.Color
+import android.view.Gravity
+
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.FrameLayout
+import android.widget.FrameLayout.LayoutParams
 import com.example.switchbutton.button.SwitchButtonView2
-import java.text.SimpleDateFormat
-import java.util.*
+import com.example.switchbutton.buttonShow.ButtonUtil
+import com.example.switchbutton.buttonShow.MyProperty
 import kotlin.math.abs
+import com.example.switchbutton.buttonShow.Point
+import com.example.switchbutton.buttonShow.PointEvaluator
 
 
 class MainActivity : AppCompatActivity() {
@@ -30,39 +34,49 @@ class MainActivity : AppCompatActivity() {
 
     private fun addView(){
         var newButton = SwitchButtonView2(this)
+
         newButton.setOnSwitchListener(object: onSwitchListener {
             override fun onSwitchChanged(isCheck: Boolean) {
-                Toast.makeText(this@MainActivity,"isCheck is $isCheck",Toast.LENGTH_SHORT).show()
-             }
-
-            override fun onRotate(rotateTime: Float) {
-/*                newButton.scrollBy(0,30)
-                newButton.postInvalidate()*/
-                var animator: ObjectAnimator = if(rotateTime>0){
-                    ofFloat(newButton, "rotation",0F,360F)
-                }else{
-                    ofFloat(newButton, "rotation",0F,-360F)
-                }
-                animator.duration = abs(rotateTime).toLong()
-                animator.repeatCount = ValueAnimator.INFINITE
-                //插值器为线性
-                animator.interpolator = LinearInterpolator()
-                animator.start()
-
+                Toast.makeText(this@MainActivity, "isCheck is $isCheck", Toast.LENGTH_SHORT).show()
             }
-            })
-        layoutContainer.addView(newButton)
+
+            override fun onRotateAndMove(rotateTime: Float, speedX: Float, speedY: Float) {
+
+                //旋转动画
+                val animatorRotate: ObjectAnimator = if (rotateTime > 0) {
+                    ofFloat(newButton, "rotation", 0F, 360F)
+                } else {
+                    ofFloat(newButton, "rotation", 0F, -360F)
+                }
+                animatorRotate.duration = abs(rotateTime).toLong()
+                animatorRotate.repeatCount = ValueAnimator.INFINITE
+                //插值器为线性
+                animatorRotate.interpolator = LinearInterpolator()
+
+                //移动动画
+                val myProperty= MyProperty("move")
+                val evaluator = PointEvaluator()
+                var switchPoint = Point(newButton.x, newButton.y, speedX, speedY)
+                val animatorMove = ObjectAnimator.ofObject(newButton, myProperty,evaluator,switchPoint)
+                animatorMove.duration = abs(rotateTime).toLong()
+                animatorMove.repeatCount = ValueAnimator.INFINITE
+                //插值器为线性
+                animatorMove.interpolator = LinearInterpolator()
+
+                val animator = AnimatorSet()
+                animator.play(animatorRotate).with(animatorMove)
+                animator.start()
+/*                var switchPoint = Point(newButton.x, newButton.y, speedX, speedY)
+                ButtonUtil.buttonMove(newButton, switchPoint)*/
+            }
+        })
+        //在中间增加控件
+        val layoutParams = LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.MATCH_PARENT)
+        layoutParams.gravity = Gravity.CENTER
+        layoutContainer.addView(newButton,layoutParams)
+
     }
-/*    *//**
-     * 按钮二的点击事件
-     *//*
-    private fun addviewTwo() {
-        val textView = TextView(this)
-        //获取当前时间并格式化
-        textView.text = "测试二..."
-        textView.textSize = 20f
-        layoutContainer.addView(textView)
-    }*/
+
 
 
 
