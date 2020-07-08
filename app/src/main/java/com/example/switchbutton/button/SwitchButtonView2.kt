@@ -3,10 +3,8 @@ package com.example.switchbutton.button
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
+import android.graphics.*
+import com.example.switchbutton.buttonShow.Point
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatCheckBox
@@ -71,6 +69,10 @@ open class SwitchButtonView2@JvmOverloads constructor(context: Context,
      */
     private var isRotate = false
     private var isMove = false
+    /**
+     * 抽象一个内置点 以供修改
+     */
+    private var absPoint = Point()
 
     private lateinit var mListener: onSwitchListener
 
@@ -170,7 +172,7 @@ open class SwitchButtonView2@JvmOverloads constructor(context: Context,
                 val delXY = abs(starPointY-event.y)+abs(starPointX-event.x)
                 //转动与移动
                 if(delXY>MOVE_DISTANCE && !isRotate && !isMove){
-                    clcRotateV(starPointX,starPointY,event.x,event.y,event.eventTime-starTime)
+                    clcRotateAndMove(starPointX,starPointY,event.x,event.y,event.eventTime-starTime)
                     isRotate = true
                     isMove = true
                 }else{
@@ -263,14 +265,23 @@ open class SwitchButtonView2@JvmOverloads constructor(context: Context,
      * @param endY
      * @param touchTime 触摸时间
      */
-    fun clcRotateV(startX:Float,startY:Float,endX:Float,endY:Float,touchTime:Long){
+    fun clcRotateAndMove(startX:Float,startY:Float,endX:Float,endY:Float,touchTime:Long){
         //x轴决定转动方向 x轴与y轴共同决定转动速度
-        val rotateV = (startX-(this.x+DEFAULT_WIDTH/2)) * (endY-startY)/touchTime
-        val rotateTime = ( Math.PI*(this.x+DEFAULT_WIDTH/2)*(this.x+DEFAULT_WIDTH/2) ).toFloat() / rotateV
+        //防止为0
+        val rotateV = (startX-DEFAULT_WIDTH/2) * (endY-startY)/(touchTime+1e-5F)
+        val rotateTime = ( Math.PI*(DEFAULT_WIDTH/2)*(DEFAULT_WIDTH/2) ).toFloat() / rotateV
         val moveXV = (endX-startX)/touchTime
         val moveYV = (endY-startY)/touchTime
         mListener.onRotateAndMove(rotateTime,moveXV,moveYV)
     }
+
+    fun setPoint(point:Point){
+        absPoint = point
+    }
+    fun getPoint():Point{
+        return absPoint
+    }
+
 
 
 }

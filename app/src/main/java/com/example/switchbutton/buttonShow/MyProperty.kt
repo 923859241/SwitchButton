@@ -13,14 +13,14 @@ class MyProperty(name:String):Property<Button,Point>(Point::class.java,name) {
     }
 
     override fun set(targetButton: Button, value: Point) {
-        targetButton.translationX = targetButton.translationX+2*value.speedX
-        targetButton.translationY = targetButton.translationY+2*value.speedY
+        targetButton.translationX = targetButton.translationX+ButtonUtil.moveTimes*value.speedX
+        targetButton.translationY = targetButton.translationY+ButtonUtil.moveTimes*value.speedY
         //对应点也改变
         //根据移动后的点 修改速度正负
-        if (targetButton.top < 0 || targetButton.translationX > ButtonUtil.mWidth){
+        if (targetButton.x< 0 || targetButton.x > (ButtonUtil.mWidth-targetButton.width) ){
             value.speedX = -value.speedX
         }
-        if (targetButton.translationY < 0 || targetButton.translationY > ButtonUtil.mHeight){
+        if (targetButton.y < 0 || targetButton.y > (ButtonUtil.mHeight-targetButton.width) ){
             value.speedY = -value.speedY
         }
         //修改当前点的数据
