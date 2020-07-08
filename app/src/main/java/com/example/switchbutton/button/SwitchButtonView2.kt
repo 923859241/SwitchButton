@@ -13,7 +13,10 @@ import kotlin.math.abs
 open class SwitchButtonView2@JvmOverloads constructor(context: Context,
                                                       attrs: AttributeSet? = null,
                                                       defStyleAttr: Int = 0) : AppCompatCheckBox(context,attrs,defStyleAttr) {
+
     private val TAG = "SwitchButton"
+
+    private val BUTTONID = viewCount
     /**
      * 控件默认宽度
      */
@@ -77,6 +80,7 @@ open class SwitchButtonView2@JvmOverloads constructor(context: Context,
     private lateinit var mListener: onSwitchListener
 
     init {
+        viewCount++
         // 不显示 CheckBox 默认的 Button
         buttonDrawable = null
         // 不显示 CheckBox 默认的背景
@@ -87,6 +91,10 @@ open class SwitchButtonView2@JvmOverloads constructor(context: Context,
         setOnClickListener {
             startAnimate()
         }
+    }
+    companion object {
+        @JvmStatic
+        private var viewCount = 0
     }
 
     override fun onMeasure(widthMeasureSpec:Int,heightMeasureSpec:Int) {
@@ -280,6 +288,9 @@ open class SwitchButtonView2@JvmOverloads constructor(context: Context,
     }
     fun getPoint():Point{
         return absPoint
+    }
+    fun getID():Int{
+        return BUTTONID
     }
 
 
