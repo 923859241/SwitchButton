@@ -1,5 +1,5 @@
 <litepal>
-    <dbname value="cool_weather"/>
+    <dbname value="switchPoint"/>
     <version value = "1"/>
     <list>
         <mapping class="com.example.switchbutton.db.dbPoint"/>

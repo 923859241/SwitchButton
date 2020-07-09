@@ -12,14 +12,17 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.switchbutton.button.SwitchButtonView2
 import com.example.switchbutton.button.onSwitchListener
 import com.example.switchbutton.buttonShow.ButtonUtil
+import com.example.switchbutton.buttonShow.Point
 import com.example.switchbutton.db.dbPoint
 import kotlinx.android.synthetic.main.activity_main.*
 import org.litepal.LitePal
+import org.litepal.LitePal.getDatabase
+import org.litepal.extension.deleteAll
 import org.litepal.extension.findAll
 
 
 class MainActivity : AppCompatActivity() {
-    //保存全部点的隐射
+    //保存全部点的映射
     var buttonMap = HashMap<Int,SwitchButtonView2>()
 
     private var isShowBubble = true
@@ -27,8 +30,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         LitePal.initialize(this@MainActivity)
+        initSwitch()
         setDimension()//获取屏幕大小
         buttonAdd.setOnClickListener {
             addView()
@@ -42,15 +45,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
+    override fun onStop() {
         //保存map
         buttonMap.forEach{
                 (key, value) ->
             val mdbPoint = dbPoint()
-            mdbPoint.mDbpoint = value.getPoint()
             mdbPoint.pointId = value.getID()
+            mdbPoint.x = value.x
+            mdbPoint.y = value.y
             mdbPoint.save()
         }
+        val allSwitchs = LitePal.findAll<dbPoint>()
         //保存弹窗状态
         val sharedPreferences =
             getSharedPreferences("isShowBubble", Context.MODE_PRIVATE) //私有数据
@@ -58,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         editor.putBoolean("isShowBubble", isShowBubble)
         editor.apply() //提交修改
 
-        super.onDestroy()
+        super.onStop()
     }
 
     /**
@@ -176,11 +181,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * 描述:从数据库更新数据
+     * 描述:从数据库与share更新数据
      *
      */
     fun initSwitch(){
+        val db = getDatabase()
         val allSwitchs = LitePal.findAll<dbPoint>()
+        allSwitchs.forEach{
+            addView(it.x.toInt(),it.y.toInt())
+        }
+        //清除数据库状态
+        LitePal.deleteAll<dbPoint>()
+
+        getSharedPreferences("isShowBubble", Context.MODE_PRIVATE).apply {
+            isShowBubble = getBoolean("isShowBubble",true)
+        }
+
 
     }
 }
