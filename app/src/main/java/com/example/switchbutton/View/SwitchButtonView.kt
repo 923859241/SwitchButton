@@ -1,4 +1,4 @@
-package com.example.switchbutton.button
+package com.example.switchbutton.View
 
 import android.content.Context
 import android.content.res.TypedArray

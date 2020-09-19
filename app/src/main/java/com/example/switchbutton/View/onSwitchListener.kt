@@ -1,4 +1,4 @@
-package com.example.switchbutton.button
+package com.example.switchbutton.View
 
 interface onSwitchListener {
     /**

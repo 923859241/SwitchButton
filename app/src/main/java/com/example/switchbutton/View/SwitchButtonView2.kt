@@ -1,10 +1,10 @@
-package com.example.switchbutton.button
+package com.example.switchbutton.View
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.*
-import com.example.switchbutton.buttonShow.Point
+import com.example.switchbutton.Presenter.Point
 import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.appcompat.widget.AppCompatCheckBox

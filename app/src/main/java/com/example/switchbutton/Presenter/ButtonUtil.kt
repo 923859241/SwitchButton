@@ -1,15 +1,10 @@
-package com.example.switchbutton.buttonShow
+package com.example.switchbutton.Presenter
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
-import android.content.Context
-import android.text.Layout
 import android.view.animation.LinearInterpolator
-import android.widget.Button
-import com.example.switchbutton.button.SwitchButtonView2
-import java.lang.Exception
-import java.util.concurrent.Executors
+import com.example.switchbutton.View.SwitchButtonView2
 import kotlin.math.abs
 
 
@@ -34,7 +29,7 @@ object ButtonUtil {
      * @param speedX x轴速度
      * @param speedY y轴速度
      */
-    fun RotateAndMove(newButton: SwitchButtonView2,rotateTime: Float, speedX: Float, speedY: Float) {
+    fun rotateAndMove(newButton: SwitchButtonView2,rotateTime: Float, speedX: Float, speedY: Float) {
         //旋转动画
         val animatorRotate: ObjectAnimator = if (rotateTime > 0) {
             ObjectAnimator.ofFloat(newButton, "rotation", 0F, 360F)

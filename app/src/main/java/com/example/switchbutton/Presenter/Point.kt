@@ -1,4 +1,4 @@
-package com.example.switchbutton.buttonShow
+package com.example.switchbutton.Presenter
 
 data class Point @JvmOverloads constructor(var x:Float = 0F,
                                            var y:Float = 0F,

@@ -1,4 +1,4 @@
-package com.example.switchbutton
+package com.example.switchbutton.View
 
 import android.app.Dialog
 import android.content.Context
@@ -9,11 +9,10 @@ import android.widget.FrameLayout.LayoutParams
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.switchbutton.button.SwitchButtonView2
-import com.example.switchbutton.button.onSwitchListener
-import com.example.switchbutton.buttonShow.ButtonUtil
-import com.example.switchbutton.buttonShow.Point
-import com.example.switchbutton.db.dbPoint
+import com.example.switchbutton.R
+import com.example.switchbutton.Presenter.ButtonUtil
+import com.example.switchbutton.Model.DbPoint
+import com.example.switchbutton.Presenter.SwitchButtonPresenter
 import kotlinx.android.synthetic.main.activity_main.*
 import org.litepal.LitePal
 import org.litepal.LitePal.getDatabase
@@ -24,6 +23,8 @@ import org.litepal.extension.findAll
 class MainActivity : AppCompatActivity() {
     //保存全部点的映射
     var buttonMap = HashMap<Int,SwitchButtonView2>()
+    //建立与Presenter的联系
+    val mPresenter = SwitchButtonPresenter()
 
     private var isShowBubble = true
 
@@ -46,23 +47,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        //保存map
-        buttonMap.forEach{
-                (key, value) ->
-            val mdbPoint = dbPoint()
-            mdbPoint.pointId = value.getID()
-            mdbPoint.x = value.x
-            mdbPoint.y = value.y
-            mdbPoint.save()
-        }
-        val allSwitchs = LitePal.findAll<dbPoint>()
-        //保存弹窗状态
-        val sharedPreferences =
-            getSharedPreferences("isShowBubble", Context.MODE_PRIVATE) //私有数据
-        val editor = sharedPreferences.edit() //获取编辑器
-        editor.putBoolean("isShowBubble", isShowBubble)
-        editor.apply() //提交修改
-
+        mPresenter.saveData(buttonMap,isShowBubble,this@MainActivity)
         super.onStop()
     }
 
@@ -88,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onRotateAndMove(rotateTime: Float, speedX: Float, speedY: Float) {
-                ButtonUtil.RotateAndMove(newButton,rotateTime, speedX, speedY)
+                mPresenter.pRotateAndMove(newButton,rotateTime, speedX, speedY)
             }
         })
         //在界面中间增加控件
@@ -119,7 +104,9 @@ class MainActivity : AppCompatActivity() {
         val tmpWidth: Int =ButtonUtil.mWidth / 5 * 3
         val tmpHeight: Int = ButtonUtil.mHeight / 8
 
-        val bubbleAlert = Dialog(this,R.style.bubble_dialog)
+        val bubbleAlert = Dialog(this,
+            R.style.bubble_dialog
+        )
         val bubbleView = layoutInflater.inflate(R.layout.overlay_pop, null)
         val tvKnow = bubbleView.findViewById(R.id.tvKnow) as TextView
         tvKnow.text = Html.fromHtml("<u>" + "我知道了" + "</u>")
@@ -154,7 +141,9 @@ class MainActivity : AppCompatActivity() {
         val tmpWidth: Int =ButtonUtil.mWidth / 5 * 3
         val tmpHeight: Int = ButtonUtil.mHeight / 8
 
-        val bubbleAlert = Dialog(this,R.style.bubble_dialog)
+        val bubbleAlert = Dialog(this,
+            R.style.bubble_dialog
+        )
         val bubbleView = layoutInflater.inflate(R.layout.overlay_pop, null)
         val tvKnow = bubbleView.findViewById(R.id.tvKnow) as TextView
         tvKnow.text = Html.fromHtml("<u>" + "我知道了" + "</u>")
@@ -184,19 +173,10 @@ class MainActivity : AppCompatActivity() {
      * 描述:从数据库与share更新数据
      *
      */
-    fun initSwitch(){
-        val db = getDatabase()
-        val allSwitchs = LitePal.findAll<dbPoint>()
-        allSwitchs.forEach{
+    private fun initSwitch(){
+        mPresenter.loadData().forEach{
             addView(it.x.toInt(),it.y.toInt())
         }
-        //清除数据库状态
-        LitePal.deleteAll<dbPoint>()
-
-        getSharedPreferences("isShowBubble", Context.MODE_PRIVATE).apply {
-            isShowBubble = getBoolean("isShowBubble",true)
-        }
-
-
+        isShowBubble = mPresenter.loadIsShowBubble(this)
     }
 }
